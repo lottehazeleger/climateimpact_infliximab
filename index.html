@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Gratis BTW Calculator</title>
-  <meta name="description" content="Bereken snel en gratis het bedrag inclusief of exclusief btw." />
+  <title>Infliximab GHG Emissions Calculator</title>
+  <meta name="description" content="Calculate estimated greenhouse gas emissions for subcutaneous and intravenous infliximab administration in kgCO2-eq." />
 
   <style>
     body {
@@ -17,7 +17,7 @@
     }
 
     .container {
-      max-width: 520px;
+      max-width: 620px;
       margin: 0 auto;
       background: white;
       padding: 28px;
@@ -36,7 +36,7 @@
       font-weight: bold;
     }
 
-    input, select, button {
+    input, button {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -59,78 +59,136 @@
       background: #333;
     }
 
-    .resultaat {
+    .results {
       margin-top: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .result-card {
       padding: 16px;
       background: #f0f4ff;
       border-radius: 10px;
-      font-size: 18px;
-      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .result-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 19px;
+    }
+
+    .difference {
+      background: #f2fff4;
     }
 
     .uitleg {
       margin-top: 28px;
       line-height: 1.6;
+      font-size: 15px;
+    }
+
+    code {
+      background: #f1f1f1;
+      padding: 2px 5px;
+      border-radius: 4px;
     }
   </style>
 </head>
 
 <body>
   <main class="container">
-    <h1>Gratis BTW Calculator</h1>
-    <p>Bereken eenvoudig een bedrag inclusief of exclusief btw.</p>
+    <h1>Infliximab GHG Emissions Calculator</h1>
 
-    <label for="bedrag">Bedrag</label>
-    <input id="bedrag" type="number" placeholder="Bijvoorbeeld 100" />
+    <p>
+      Estimate greenhouse gas emissions for subcutaneous and intravenous
+      infliximab administration in <strong>kgCO2-eq</strong>.
+    </p>
 
-    <label for="btw">BTW-percentage</label>
-    <select id="btw">
-      <option value="21">21%</option>
-      <option value="9">9%</option>
-      <option value="0">0%</option>
-    </select>
+    <label for="dose">Dose of infliximab</label>
+    <input id="dose" type="number" min="0" step="any" placeholder="Dose in mg, e.g. 300" />
 
-    <label for="richting">Wat wil je berekenen?</label>
-    <select id="richting">
-      <option value="inclusief">Bedrag inclusief btw</option>
-      <option value="exclusief">Bedrag exclusief btw</option>
-    </select>
+    <label for="distance">Travel distance</label>
+    <input id="distance" type="number" min="0" step="any" placeholder="One-way distance in km, e.g. 25" />
 
-    <button onclick="bereken()">Bereken</button>
+    <button onclick="calculateGHG()">Calculate emissions</button>
 
-    <div id="resultaat" class="resultaat">
-      Vul een bedrag in en klik op berekenen.
+    <div class="results">
+      <div class="result-card">
+        <strong>Subcutaneous administration</strong>
+        <span id="scResult">Enter a dose to calculate SC emissions.</span>
+      </div>
+
+      <div class="result-card">
+        <strong>Intravenous administration</strong>
+        <span id="ivResult">Enter dose and distance to calculate IV emissions.</span>
+      </div>
+
+      <div class="result-card difference">
+        <strong>Difference</strong>
+        <span id="differenceResult">Results will appear here.</span>
+      </div>
     </div>
 
     <section class="uitleg">
-      <h2>Hoe werkt deze btw calculator?</h2>
+      <h2>Formulas used</h2>
+
       <p>
-        Vul een bedrag in, kies het btw-percentage en geef aan of je het bedrag
-        inclusief of exclusief btw wilt berekenen. De calculator toont direct het resultaat.
+        <strong>Subcutaneous:</strong><br>
+        <code>SC_GHG = 28.9 / 549 × dose_in_mg</code>
+      </p>
+
+      <p>
+        <strong>Intravenous:</strong><br>
+        <code>IV_GHG = 5.26 + 42.15 / 614 × dose_in_mg + 22.89 / 54.6 × 2 × distance_in_km</code>
+      </p>
+
+      <p>
+        The travel distance is treated as a one-way distance and multiplied by 2
+        in the intravenous formula.
       </p>
     </section>
   </main>
 
   <script>
-    function bereken() {
-      const bedrag = Number(document.getElementById("bedrag").value);
-      const btw = Number(document.getElementById("btw").value);
-      const richting = document.getElementById("richting").value;
-      const resultaat = document.getElementById("resultaat");
+    function calculateGHG() {
+      const dose = Number(document.getElementById("dose").value);
+      const distance = Number(document.getElementById("distance").value);
 
-      if (!bedrag || bedrag < 0) {
-        resultaat.textContent = "Vul een geldig bedrag in.";
+      const scResult = document.getElementById("scResult");
+      const ivResult = document.getElementById("ivResult");
+      const differenceResult = document.getElementById("differenceResult");
+
+      if (dose < 0 || distance < 0 || isNaN(dose) || isNaN(distance)) {
+        scResult.textContent = "Please enter valid positive numbers.";
+        ivResult.textContent = "Please enter valid positive numbers.";
+        differenceResult.textContent = "Cannot calculate with invalid values.";
         return;
       }
 
-      let uitkomst;
+      if (dose === 0 && distance === 0) {
+        scResult.textContent = "Enter a dose to calculate SC emissions.";
+        ivResult.textContent = "Enter dose and distance to calculate IV emissions.";
+        differenceResult.textContent = "Results will appear here.";
+        return;
+      }
 
-      if (richting === "inclusief") {
-        uitkomst = bedrag * (1 + btw / 100);
-        resultaat.textContent = "Bedrag inclusief btw: €" + uitkomst.toFixed(2);
+      const scGHG = (28.9 / 549) * dose;
+      const ivGHG = 5.26 + (42.15 / 614) * dose + (22.89 / 54.6) * 2 * distance;
+      const difference = ivGHG - scGHG;
+
+      scResult.textContent = scGHG.toFixed(2) + " kgCO2-eq";
+      ivResult.textContent = ivGHG.toFixed(2) + " kgCO2-eq";
+
+      if (difference > 0) {
+        differenceResult.textContent =
+          "IV administration is " + difference.toFixed(2) + " kgCO2-eq higher than SC administration.";
+      } else if (difference < 0) {
+        differenceResult.textContent =
+          "SC administration is " + Math.abs(difference).toFixed(2) + " kgCO2-eq higher than IV administration.";
       } else {
-        uitkomst = bedrag / (1 + btw / 100);
-        resultaat.textContent = "Bedrag exclusief btw: €" + uitkomst.toFixed(2);
+        differenceResult.textContent =
+          "Both administration routes have the same estimated emissions.";
       }
     }
   </script>

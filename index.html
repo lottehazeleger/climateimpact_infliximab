@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Gratis BTW Calculator</title>
+  <meta name="description" content="Bereken snel en gratis het bedrag inclusief of exclusief btw." />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7f9;
+      margin: 0;
+      padding: 40px 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      background: white;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 22px;
+      border: none;
+      background: #111;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #333;
+    }
+
+    .resultaat {
+      margin-top: 24px;
+      padding: 16px;
+      background: #f0f4ff;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .uitleg {
+      margin-top: 28px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Gratis BTW Calculator</h1>
+    <p>Bereken eenvoudig een bedrag inclusief of exclusief btw.</p>
+
+    <label for="bedrag">Bedrag</label>
+    <input id="bedrag" type="number" placeholder="Bijvoorbeeld 100" />
+
+    <label for="btw">BTW-percentage</label>
+    <select id="btw">
+      <option value="21">21%</option>
+      <option value="9">9%</option>
+      <option value="0">0%</option>
+    </select>
+
+    <label for="richting">Wat wil je berekenen?</label>
+    <select id="richting">
+      <option value="inclusief">Bedrag inclusief btw</option>
+      <option value="exclusief">Bedrag exclusief btw</option>
+    </select>
+
+    <button onclick="bereken()">Bereken</button>
+
+    <div id="resultaat" class="resultaat">
+      Vul een bedrag in en klik op berekenen.
+    </div>
+
+    <section class="uitleg">
+      <h2>Hoe werkt deze btw calculator?</h2>
+      <p>
+        Vul een bedrag in, kies het btw-percentage en geef aan of je het bedrag
+        inclusief of exclusief btw wilt berekenen. De calculator toont direct het resultaat.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    function bereken() {
+      const bedrag = Number(document.getElementById("bedrag").value);
+      const btw = Number(document.getElementById("btw").value);
+      const richting = document.getElementById("richting").value;
+      const resultaat = document.getElementById("resultaat");
+
+      if (!bedrag || bedrag < 0) {
+        resultaat.textContent = "Vul een geldig bedrag in.";
+        return;
+      }
+
+      let uitkomst;
+
+      if (richting === "inclusief") {
+        uitkomst = bedrag * (1 + btw / 100);
+        resultaat.textContent = "Bedrag inclusief btw: €" + uitkomst.toFixed(2);
+      } else {
+        uitkomst = bedrag / (1 + btw / 100);
+        resultaat.textContent = "Bedrag exclusief btw: €" + uitkomst.toFixed(2);
+      }
+    }
+  </script>
+</body>
+</html>

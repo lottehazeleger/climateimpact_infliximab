@@ -17,7 +17,7 @@
     }
 
     .container {
-      max-width: 620px;
+      max-width: 720px;
       margin: 0 auto;
       background: white;
       padding: 28px;
@@ -46,8 +46,14 @@
       border: 1px solid #ccc;
     }
 
+    .hint {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+    }
+
     button {
-      margin-top: 22px;
+      margin-top: 24px;
       border: none;
       background: #111;
       color: white;
@@ -92,6 +98,8 @@
       background: #f1f1f1;
       padding: 2px 5px;
       border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -105,23 +113,44 @@
       infliximab administration in <strong>kgCO2-eq</strong>.
     </p>
 
-    <label for="dose">Dose of infliximab</label>
-    <input id="dose" type="number" min="0" step="any" placeholder="Dose in mg, e.g. 300" />
+    <h2>Subcutaneous administration</h2>
 
-    <label for="distance">Travel distance</label>
+    <label for="scDosage">SC dosage</label>
+    <input id="scDosage" type="number" min="0" step="any" placeholder="Dosage in mg, e.g. 120" />
+    <div class="hint">Enter the subcutaneous infliximab dosage in mg.</div>
+
+    <label for="scWeeks">SC administration interval</label>
+    <input id="scWeeks" type="number" min="0" step="any" placeholder="Per X weeks, e.g. 2" />
+    <div class="hint">Enter the interval as number of weeks.</div>
+
+    <h2>Intravenous administration</h2>
+
+    <label for="ivDoseMgKg">IV dose</label>
+    <input id="ivDoseMgKg" type="number" min="0" step="any" placeholder="Dose in mg/kg, e.g. 5" />
+    <div class="hint">Enter the intravenous dose in mg per kg body weight.</div>
+
+    <label for="patientWeight">Patient weight</label>
+    <input id="patientWeight" type="number" min="0" step="any" placeholder="Patient weight in kg, e.g. 70" />
+
+    <label for="ivWeeks">IV administration interval</label>
+    <input id="ivWeeks" type="number" min="0" step="any" placeholder="Per X weeks, e.g. 8" />
+    <div class="hint">Enter the interval as number of weeks. The formula adjusts this using X / 8.</div>
+
+    <label for="distance">One-way distance to hospital</label>
     <input id="distance" type="number" min="0" step="any" placeholder="One-way distance in km, e.g. 25" />
+    <div class="hint">The formula multiplies this by 2 for return travel.</div>
 
     <button onclick="calculateGHG()">Calculate emissions</button>
 
     <div class="results">
       <div class="result-card">
         <strong>Subcutaneous administration</strong>
-        <span id="scResult">Enter a dose to calculate SC emissions.</span>
+        <span id="scResult">Enter the SC values to calculate emissions.</span>
       </div>
 
       <div class="result-card">
         <strong>Intravenous administration</strong>
-        <span id="ivResult">Enter dose and distance to calculate IV emissions.</span>
+        <span id="ivResult">Enter the IV values to calculate emissions.</span>
       </div>
 
       <div class="result-card difference">
@@ -135,46 +164,62 @@
 
       <p>
         <strong>Subcutaneous:</strong><br>
-        <code>SC_GHG = 28.9 / 549 × dose_in_mg</code>
+        <code>SC_GHG = (28.9 / 549) × dosage × per_X_weeks</code>
       </p>
 
       <p>
         <strong>Intravenous:</strong><br>
-        <code>IV_GHG = 5.26 + 42.15 / 614 × dose_in_mg + 22.89 / 54.6 × 2 × distance_in_km</code>
+        <code>IV_GHG = 5.26 + (42.15 / 614) × dose_mg_per_kg × patient_weight_kg × (per_X_weeks / 8) + (22.89 / (54.6 × 1.28)) × 2 × distance_km × (per_X_weeks / 8)</code>
       </p>
 
       <p>
-        The travel distance is treated as a one-way distance and multiplied by 2
-        in the intravenous formula.
+        Results are expressed in <strong>kgCO2-eq</strong>.
       </p>
     </section>
   </main>
 
   <script>
     function calculateGHG() {
-      const dose = Number(document.getElementById("dose").value);
+      const scDosage = Number(document.getElementById("scDosage").value);
+      const scWeeks = Number(document.getElementById("scWeeks").value);
+
+      const ivDoseMgKg = Number(document.getElementById("ivDoseMgKg").value);
+      const patientWeight = Number(document.getElementById("patientWeight").value);
+      const ivWeeks = Number(document.getElementById("ivWeeks").value);
       const distance = Number(document.getElementById("distance").value);
 
       const scResult = document.getElementById("scResult");
       const ivResult = document.getElementById("ivResult");
       const differenceResult = document.getElementById("differenceResult");
 
-      if (dose < 0 || distance < 0 || isNaN(dose) || isNaN(distance)) {
+      const values = [
+        scDosage,
+        scWeeks,
+        ivDoseMgKg,
+        patientWeight,
+        ivWeeks,
+        distance
+      ];
+
+      const hasInvalidValue = values.some(value => isNaN(value) || value < 0);
+
+      if (hasInvalidValue) {
         scResult.textContent = "Please enter valid positive numbers.";
         ivResult.textContent = "Please enter valid positive numbers.";
         differenceResult.textContent = "Cannot calculate with invalid values.";
         return;
       }
 
-      if (dose === 0 && distance === 0) {
-        scResult.textContent = "Enter a dose to calculate SC emissions.";
-        ivResult.textContent = "Enter dose and distance to calculate IV emissions.";
-        differenceResult.textContent = "Results will appear here.";
-        return;
-      }
+      const scGHG = (28.9 / 549) * scDosage * scWeeks;
 
-      const scGHG = (28.9 / 549) * dose;
-      const ivGHG = 5.26 + (42.15 / 614) * dose + (22.89 / 54.6) * 2 * distance;
+      const ivMedicationGHG =
+        (42.15 / 614) * ivDoseMgKg * patientWeight * (ivWeeks / 8);
+
+      const ivTravelGHG =
+        (22.89 / (54.6 * 1.28)) * (2 * distance) * (ivWeeks / 8);
+
+      const ivGHG = 5.26 + ivMedicationGHG + ivTravelGHG;
+
       const difference = ivGHG - scGHG;
 
       scResult.textContent = scGHG.toFixed(2) + " kgCO2-eq";

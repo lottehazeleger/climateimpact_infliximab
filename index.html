@@ -34,8 +34,16 @@
   <div class="hint">Used for delivery, inefficient pick-up, and IV travel.</div>
 
   <label for="efType">Transport emission factor (EFtype)</label>
-  <input id="efType" type="number" min="0" step="any" placeholder="kgCO2-eq per km">
-  <div class="hint">Enter the emission factor belonging to the selected transport type.</div>
+  <select id="efType">
+    <option value="">Select a transport type</option>
+    <option value="0.360889761">Non-electric passenger car — 0.360889761</option>
+    <option value="0.079453673">Train or metro — 0.079453673</option>
+    <option value="0.012874701">Bike — 0.012874701</option>
+    <option value="0.094054053">Tram — 0.094054053</option>
+    <option value="0.125728787">Bus — 0.125728787</option>
+    <option value="0.191735348">Electric passenger car — 0.191735348</option>
+  </select>
+  <div class="hint">Select the transport type; its emission factor is inserted automatically.</div>
 
   <h2>Subcutaneous administration</h2>
   <label for="scDosage">SC dose</label>
@@ -78,7 +86,7 @@
     <h2>Formulas used</h2>
     <p><strong>Subcutaneous:</strong><code>SC = 0.42 × dose_SC / interval_SC + supply_emissions</code></p>
     <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: 16 × EFtype × distance × n_dispensed / interval_SC</code></p>
-    <p><strong>Intravenous:</strong><code>IV = 0.56 × (dose_IV × weight + 16 × EFtype × distance + 11.25) / interval_IV</code></p>
+    <p><strong>Intravenous:</strong><code>IV = (0.56 × dose_IV × weight + 16 × EFtype × distance + 11.25) / interval_IV</code></p>
     <p class="small-note">The formulas are implemented exactly as shown in the supplied image. Distance is therefore not automatically doubled.</p>
   </section>
 </main>
@@ -125,7 +133,7 @@
     if (method === "inefficient") supplyEmissions = 16 * efType * distance * nDispensed / scInterval;
 
     const scGHG = 0.42 * scDosage / scInterval + supplyEmissions;
-    const ivGHG = 0.56 * (ivDose * weight + 16 * efType * distance + 11.25) / ivInterval;
+    const ivGHG = (0.56 * ivDose * weight + 16 * efType * distance + 11.25) / ivInterval;
     const difference = ivGHG - scGHG;
 
     byId("scResult").textContent = `${scGHG.toFixed(2)} kgCO2-eq`;

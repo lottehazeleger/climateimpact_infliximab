@@ -85,7 +85,7 @@
   <section class="formula-section">
     <h2>Formulas used</h2>
     <p><strong>Subcutaneous:</strong><code>SC = 0.42 × dose_SC / interval_SC + supply_emissions</code></p>
-    <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: 16 × EFtype × distance × n_dispensed / interval_SC</code></p>
+    <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: (8 / interval_SC / n_dispensed) × (2 × distance × EFtype)</code></p>
     <p><strong>Intravenous:</strong><code>IV = (0.56 × dose_IV × weight + 16 × EFtype × distance + 11.25) / interval_IV</code></p>
     <p class="small-note">The formulas are implemented exactly as shown in the supplied image. Distance is therefore not automatically doubled.</p>
   </section>
@@ -130,7 +130,10 @@
 
     let supplyEmissions = 0;
     if (method === "delivery") supplyEmissions = 4.15e-6 * distance;
-    if (method === "inefficient") supplyEmissions = 16 * efType * distance * nDispensed / scInterval;
+    if (method === "inefficient") {
+      const pickupTrips = (8 / scInterval) / nDispensed;
+      supplyEmissions = pickupTrips * 2 * distance * efType;
+    }
 
     const scGHG = 0.42 * scDosage / scInterval + supplyEmissions;
     const ivGHG = (0.56 * ivDose * weight + 16 * efType * distance + 11.25) / ivInterval;

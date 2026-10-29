@@ -128,6 +128,13 @@
       line-height: 1.6;  
       color: #444;
     }
+    .car-comparison {
+      background-color: #e8f5e9;
+      border: 1px solid #81c784;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
 
     .formula-section, .sources-section {
       margin-top: 30px;
@@ -317,6 +324,18 @@
       <strong>Difference</strong>
       <span id="differenceResult">Results will appear here.</span>
     </div>
+
+    <div class="car-comparison">
+      <h3>🚗 Equivalent petrol-car journey</h3>
+      <p>
+        The emissions difference is equivalent to driving
+        <strong><span id="carKm">—</span> km</strong>
+        in a regular petrol-powered car.
+      </p>
+      <small>
+        Based on an emission factor of 0.204 kg CO₂-eq per km.
+      </small>
+    </div>
   </div>
 
   <p class="small-note">
@@ -504,6 +523,14 @@
           ? `s.c. administration is ${Math.abs(difference).toFixed(2)} kg CO<sub>2</sub>-eq higher than i.v. administration.`
           : "Both administration routes have the same estimated emissions.";
   }
+  const petrolCarEmissionFactor = 0.204; // kg CO₂-eq/km
+
+  const carKm = Math.abs(emissionsDifference) / petrolCarEmissionFactor;
+  
+  document.getElementById("carKm").textContent =
+    carKm.toLocaleString(undefined, {
+      maximumFractionDigits: 1
+    });
 </script>
 
 </body>

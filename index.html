@@ -26,12 +26,12 @@
 <body>
 <main class="container">
   <h1>[Prototype] Infliximab GHG Emissions Calculator</h1>
-  <p>Estimate emissions for subcutaneous and intravenous infliximab administration in <strong>kgCO2-eq</strong>.</p>
+  <p>Estimate emissions for subcutaneous (s.c.) and intravenous (i.v.) infliximab administration in <strong>kgCO2-eq</strong>.</p>
 
   <h2>General inputs</h2>
   <label for="distance">One-way distance (km)</label>
   <input id="distance" type="number" min="0" step="any" placeholder="e.g. 25">
-  <div class="hint">Used for delivery, inefficient pick-up, and IV travel.</div>
+  <div class="hint">Used for delivery, inefficient pick-up, and i.v. travel.</div>
 
   <label for="efType">Transport emission factor (EFtype)</label>
   <select id="efType">
@@ -46,10 +46,10 @@
   <div class="hint">Select the transport type; its emission factor is inserted automatically.</div>
 
   <h2>Subcutaneous administration</h2>
-  <label for="scDosage">SC dose</label>
+  <label for="scDosage">s.c. dose</label>
   <input id="scDosage" type="number" min="0" step="any" placeholder="Dose in mg, e.g. 120">
 
-  <label for="scInterval">SC interval</label>
+  <label for="scInterval">s.c. interval</label>
   <input id="scInterval" type="number" min="0" step="any" placeholder="Interval used by the formula">
 
   <label for="scMethod">Supply method</label>
@@ -65,13 +65,13 @@
   </div>
 
   <h2>Intravenous administration</h2>
-  <label for="ivDoseMgKg">IV dose (mg/kg)</label>
+  <label for="ivDoseMgKg">i.v. dose (mg/kg)</label>
   <input id="ivDoseMgKg" type="number" min="0" step="any" placeholder="e.g. 5">
 
   <label for="patientWeight">Patient weight (kg)</label>
   <input id="patientWeight" type="number" min="0" step="any" placeholder="e.g. 70">
 
-  <label for="ivInterval">IV interval</label>
+  <label for="ivInterval">i.v. interval</label>
   <input id="ivInterval" type="number" min="0" step="any" placeholder="Interval used by the formula">
 
   <button id="calculateButton" type="button">Calculate emissions</button>
@@ -84,9 +84,9 @@
 
   <section class="formula-section">
     <h2>Formulas used</h2>
-    <p><strong>Subcutaneous:</strong><code>SC = (0.42 × dose_SC + 0.96) / interval_SC + supply_emissions</code></p>
-    <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: (8 / interval_SC / n_dispensed) × (2 × distance × EFtype)</code></p>
-    <p><strong>Intravenous:</strong><code>IV = (0.56 × dose_IV × weight + 16 × EFtype × distance + 11.25) / interval_IV</code></p>
+    <p><strong>Subcutaneous:</strong><code>s.c. = (0.42 × dose_s.c. + 0.96) / interval_s.c. + supply_emissions</code></p>
+    <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: (8 / interval_s.c. / n_dispensed) × (2 × distance × EFtype)</code></p>
+    <p><strong>Intravenous:</strong><code>i.v. = (0.56 × dose_i.v. × weight + 16 × EFtype × distance + 11.25) / interval_i.v.</code></p>
     <p class="small-note">The formulas are implemented exactly as shown in the supplied image. Distance is therefore not automatically doubled.</p>
   </section>
 </main>
@@ -142,9 +142,9 @@
     byId("scResult").textContent = `${scGHG.toFixed(2)} kgCO2-eq`;
     byId("ivResult").textContent = `${ivGHG.toFixed(2)} kgCO2-eq`;
     byId("differenceResult").textContent = difference > 0
-      ? `IV administration is ${difference.toFixed(2)} kgCO2-eq higher than SC administration.`
+      ? `i.v. administration is ${difference.toFixed(2)} kgCO2-eq higher than s.c. administration.`
       : difference < 0
-        ? `SC administration is ${Math.abs(difference).toFixed(2)} kgCO2-eq higher than IV administration.`
+        ? `s.c. administration is ${Math.abs(difference).toFixed(2)} kgCO2-eq higher than i.v. administration.`
         : "Both administration routes have the same estimated emissions.";
   }
 </script>

@@ -522,7 +522,7 @@
         : difference < 0
           ? `s.c. administration is ${Math.abs(difference).toFixed(2)} kg CO<sub>2</sub>-eq higher than i.v. administration.`
           : "Both administration routes have the same estimated emissions.";
-  }
+  
   const petrolCarEmissionFactor = 0.204; // kg CO₂-eq/km
 
   const carKm = Math.abs(difference) / petrolCarEmissionFactor;
@@ -531,6 +531,7 @@
     carKm.toLocaleString(undefined, {
       maximumFractionDigits: 1
     });
+  }
 </script>
 
 </body>

@@ -525,7 +525,7 @@
   }
   const petrolCarEmissionFactor = 0.204; // kg CO₂-eq/km
 
-  const carKm = Math.abs(emissionsDifference) / petrolCarEmissionFactor;
+  const carKm = Math.abs(difference) / petrolCarEmissionFactor;
   
   document.getElementById("carKm").textContent =
     carKm.toLocaleString(undefined, {

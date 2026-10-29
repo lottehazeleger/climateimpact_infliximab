@@ -1,56 +1,239 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[Prototype] Infliximab GHG Emissions Calculator</title>
-  <meta name="description" content="Calculate estimated greenhouse gas emissions for subcutaneous and intravenous infliximab administration.">
+  <meta name="description" content="Estimate greenhouse gas emissions for subcutaneous and intravenous infliximab administration.">
+
   <style>
-    body { font-family: Arial, sans-serif; background:#f6f7f9; margin:0; padding:40px 20px; color:#222; }
-    .container { max-width:760px; margin:auto; background:#fff; padding:28px; border-radius:14px; box-shadow:0 8px 24px #00000014; }
-    h1 { margin-top:0; font-size:28px; } h2 { margin-top:30px; font-size:22px; }
-    label { display:block; margin-top:18px; font-weight:bold; }
-    input, select, button { width:100%; padding:12px; margin-top:8px; font-size:16px; box-sizing:border-box; border-radius:8px; border:1px solid #ccc; }
-    .hint, .small-note { font-size:14px; color:#666; margin-top:4px; }
-    button { margin-top:24px; border:0; background:#111; color:#fff; cursor:pointer; font-weight:bold; }
-    button:hover { background:#333; }
-    .results { margin-top:24px; display:grid; gap:14px; }
-    .result-card { padding:16px; background:#f0f4ff; border-radius:10px; font-size:17px; }
-    .result-card strong { display:block; margin-bottom:6px; font-size:19px; }
-    .difference { background:#f2fff4; }
-    .formula-section { margin-top:30px; line-height:1.6; font-size:15px; }
-    code { background:#f1f1f1; padding:8px; border-radius:6px; display:block; margin-top:6px; overflow-x:auto; white-space:nowrap; }
-    [hidden] { display:none !important; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7f9;
+      margin: 0;
+      padding: 40px 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: auto;
+      background: #fff;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px #00000014;
+    }
+
+    h1 { margin-top: 0; font-size: 28px; }
+    h2 { margin-top: 30px; font-size: 22px; }
+    h3 { margin-top: 22px; font-size: 18px; }
+
+    p, li { line-height: 1.6; }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .hint, .small-note {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    button {
+      margin-top: 24px;
+      border: 0;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover { background: #333; }
+
+    .results {
+      margin-top: 24px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .result-card {
+      padding: 16px;
+      border-radius: 10px;
+      font-size: 17px;
+      border-left: 5px solid transparent;
+    }
+
+    .result-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 19px;
+    }
+
+    /* Separate colours for the two administration routes */
+    .sc-result {
+      background: #eaf4ff;
+      border-left-color: #2878c8;
+    }
+
+    .iv-result {
+      background: #f1eaff;
+      border-left-color: #8154c7;
+    }
+
+    /* Bright blue to highlight the comparison */
+    .difference {
+      background: #e3f7ff;
+      border-left-color: #00a6d6;
+    }
+
+    .estimate-note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: #fff8e7;
+      border-left: 4px solid #d9a441;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #444;
+    }
+
+    .estimate-note strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .formula-section, .sources-section {
+      margin-top: 30px;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    code {
+      background: #f1f1f1;
+      padding: 8px;
+      border-radius: 6px;
+      display: block;
+      margin-top: 6px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .sources-section {
+      padding-top: 4px;
+      border-top: 1px solid #ddd;
+    }
+
+    .sources-placeholder {
+      padding: 12px;
+      border: 1px dashed #bbb;
+      border-radius: 8px;
+      color: #666;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 600px) {
+      body { padding: 18px 10px; }
+      .container { padding: 20px 16px; }
+      h1 { font-size: 24px; }
+    }
   </style>
 </head>
+
 <body>
 <main class="container">
+
   <h1>[Prototype] Infliximab GHG Emissions Calculator</h1>
-  <p>Estimate emissions for subcutaneous (s.c.) and intravenous (i.v.) infliximab administration in <strong>kgCO2-eq</strong>.</p>
+
+  <p>
+    This tool estimates greenhouse gas emissions (GHG emissions)
+    associated with 8-week subcutaneous (s.c.) and intravenous (i.v.)
+    infliximab treatment for inflammatory bowel disease (IBD), reported
+    in kg CO<sub>2</sub>-eq. The model equations are derived from a
+    life-cycle assessment (LCA) conducted in two Dutch university hospitals.
+  </p>
+
+  <div class="estimate-note" role="note">
+    <strong>Important: estimates based on assumptions</strong>
+    Results are indicative estimates, not exact measurements. They depend
+    on model assumptions, emission factors, the values entered, and the
+    treatment and logistical pathways represented in the model. Actual
+    emissions may differ between patients, healthcare settings, transport
+    choices, and supply arrangements. Results should be interpreted in
+    the context of these assumptions and the underlying LCA.
+  </div>
+
+  <div class="estimate-note" role="note">
+    <strong>Model application in additional hospitals</strong>
+    In addition to the original LCA setting, the model has been applied
+    to data from two other Dutch hospitals: one academic hospital and
+    one non-academic hospital. This application provides insight into
+    the model's use in additional settings, but should not be interpreted
+    as formal or independent validation of the model.
+  </div>
 
   <h2>General inputs</h2>
-  <label for="distance">One-way distance (km)</label>
-  <input id="distance" type="number" min="0" step="any" placeholder="e.g. 25">
-  <div class="hint">Used for delivery, inefficient pick-up, and i.v. travel.</div>
 
-  <label for="efType">Transport emission factor (EFtype)</label>
+  <label for="distance">One-way distance from hospital to home (km)</label>
+  <input id="distance" type="number" min="0" step="any"
+         placeholder="e.g. 25">
+  <div class="hint">
+    Enter the one-way distance in kilometres. This value is used for
+    patient travel to i.v. treatment and for the relevant s.c. supply
+    pathway. The model applies distance as specified in each equation;
+    it does not automatically double the distance except in the
+    inefficient pick-up pathway, where a return journey is represented.
+  </div>
+
+  <label for="efType">Transport emission factor</label>
   <select id="efType">
     <option value="">Select a transport type</option>
     <option value="0.360889761">Non-electric passenger car — 0.360889761</option>
+    <option value="0.204">Regular petrol-powered car — 0.204</option>
     <option value="0.079453673">Train or metro — 0.079453673</option>
     <option value="0.012874701">Bike — 0.012874701</option>
     <option value="0.094054053">Tram — 0.094054053</option>
     <option value="0.125728787">Bus — 0.125728787</option>
     <option value="0.191735348">Electric passenger car — 0.191735348</option>
   </select>
-  <div class="hint">Select the transport type; its emission factor is inserted automatically.</div>
 
-  <h2>Subcutaneous administration</h2>
-  <label for="scDosage">s.c. dose</label>
-  <input id="scDosage" type="number" min="0" step="any" placeholder="Dose in mg, e.g. 120">
+  <div class="hint">
+    Choose the transport mode represented in the model. Its emission
+    factor is used in the relevant travel-related calculations. 
+  </div>
 
-  <label for="scInterval">s.c. interval</label>
-  <input id="scInterval" type="number" min="0" step="any" placeholder="Interval used by the formula">
+  <h2>Subcutaneous (s.c.) administration</h2>
+
+  <label for="scDosage">s.c. dose per administration (mg)</label>
+  <input id="scDosage" type="number" min="0" step="any"
+         placeholder="e.g. 120">
+  <div class="hint">
+    The amount of infliximab, in milligrams, given at each
+    s.c. administration.
+  </div>
+
+  <label for="scInterval">s.c. interval (weeks)</label>
+  <input id="scInterval" type="number" min="0" step="any"
+         placeholder="e.g. 2">
+  <div class="hint">
+    Number of weeks between s.c. administrations. This interval is
+    used by the equation to scale emissions to the 8-week period.
+  </div>
 
   <label for="scMethod">Supply method</label>
   <select id="scMethod">
@@ -59,49 +242,182 @@
     <option value="inefficient">Inefficient pick-up</option>
   </select>
 
-  <div id="dispensedGroup" hidden>
-    <label for="nDispensed">Number dispensed (n_dispensed)</label>
-    <input id="nDispensed" type="number" min="0" step="any" placeholder="e.g. 2">
+  <div class="hint">
+    <strong>Efficient pick-up:</strong> pens are collected alongside a
+    planned hospital or pharmacy visit.
+    <strong>Delivery:</strong> pens are delivered to the patient's home.
+    <strong>Inefficient pick-up:</strong> a separate trip is made
+    specifically to collect the pens.
   </div>
 
-  <h2>Intravenous administration</h2>
+  <div id="dispensedGroup" hidden>
+    <label for="nDispensed">
+      Number of s.c. pens dispensed per delivery or pick-up
+    </label>
+    <input id="nDispensed" type="number" min="1" step="1"
+           placeholder="e.g. 2">
+    <div class="hint">
+      Enter the number dispensed at each collection or delivery.
+      This value is used only for inefficient pick-up.
+    </div>
+  </div>
+
+  <h2>Intravenous (i.v.) administration</h2>
+
   <label for="ivDoseMgKg">i.v. dose (mg/kg)</label>
-  <input id="ivDoseMgKg" type="number" min="0" step="any" placeholder="e.g. 5">
+  <input id="ivDoseMgKg" type="number" min="0" step="any"
+         placeholder="e.g. 5">
+  <div class="hint">
+    The prescribed i.v. dose per administration, expressed in
+    milligrams per kilogram of body weight.
+  </div>
 
   <label for="patientWeight">Patient weight (kg)</label>
-  <input id="patientWeight" type="number" min="0" step="any" placeholder="e.g. 70">
-
-  <label for="ivInterval">i.v. interval</label>
-  <input id="ivInterval" type="number" min="0" step="any" placeholder="Interval used by the formula">
-
-  <button id="calculateButton" type="button">Calculate emissions</button>
-
-  <div class="results" aria-live="polite">
-    <div class="result-card"><strong>Subcutaneous administration</strong><span id="scResult">Enter the values to calculate emissions.</span></div>
-    <div class="result-card"><strong>Intravenous administration</strong><span id="ivResult">Enter the values to calculate emissions.</span></div>
-    <div class="result-card difference"><strong>Difference</strong><span id="differenceResult">Results will appear here.</span></div>
+  <input id="patientWeight" type="number" min="0" step="any"
+         placeholder="e.g. 70">
+  <div class="hint">
+    Patient body weight in kilograms. Together with the dose in mg/kg,
+    this is used to estimate the amount administered per i.v. treatment.
   </div>
 
+  <label for="ivInterval">i.v. interval (weeks)</label>
+  <input id="ivInterval" type="number" min="0" step="any"
+         placeholder="e.g. 8">
+  <div class="hint">
+    Number of weeks between i.v. administrations. This interval is
+    used by the equation to scale emissions to the 8-week period.
+  </div>
+
+  <button id="calculateButton" type="button">
+    Calculate emissions
+  </button>
+
+  <div class="results" aria-live="polite">
+    <div class="result-card sc-result">
+      <strong>Subcutaneous (s.c.) administration</strong>
+      <span id="scResult">Enter the values to calculate emissions.</span>
+    </div>
+
+    <div class="result-card iv-result">
+      <strong>Intravenous (i.v.) administration</strong>
+      <span id="ivResult">Enter the values to calculate emissions.</span>
+    </div>
+
+    <div class="result-card difference">
+      <strong>Difference</strong>
+      <span id="differenceResult">Results will appear here.</span>
+    </div>
+  </div>
+
+  <p class="small-note">
+    All results are model-based estimates in kg CO<sub>2</sub>-eq
+    for the specified 8-week treatment period. They should not be
+    interpreted as precise measurements or as a guarantee that one
+    route will have lower emissions in every setting.
+  </p>
+
   <section class="formula-section">
-    <h2>Formulas used</h2>
-    <p><strong>Subcutaneous:</strong><code>s.c. = (0.42 × dose_s.c. + 0.96) / interval_s.c. + supply_emissions</code></p>
-    <p><code>efficient pick-up: 0<br>delivery: 4.15 × 10⁻⁶ × distance<br>inefficient pick-up: (8 / interval_s.c. / n_dispensed) × (2 × distance × EFtype)</code></p>
-    <p><strong>Intravenous:</strong><code>i.v. = (0.56 × dose_i.v. × weight + 16 × EFtype × distance + 11.25) / interval_i.v.</code></p>
-    <p class="small-note">The formulas are implemented exactly as shown in the supplied image. Distance is therefore not automatically doubled.</p>
+    <h2>Model and formulas</h2>
+
+    <p>
+      The following equations calculate GHG emissions in kg CO<sub>2</sub>-eq
+      for 8-week treatment with s.c. and i.v. infliximab. These equations
+      are used in the GHG emissions model and the open-access online
+      calculation tool. The model estimates total GHG emissions by
+      combining emissions associated with the relevant treatment and
+      logistical components.
+    </p>
+
+    <h3>Subcutaneous GHG emissions</h3>
+    <code>
+      s.c. = (0.42 × dose_s.c. + 0.96) / interval_s.c. + supply_emissions
+    </code>
+
+    <p>Supply emissions depend on the selected pathway:</p>
+
+    <code>Efficient pick-up: 0</code>
+    <code>Delivery: 4.15 × 10⁻⁶ × distance</code>
+    <code>
+      Inefficient pick-up: (8 / interval_s.c. / n_dispensed)
+      × (2 × distance × EFtype)
+    </code>
+
+    <p>
+      Here, <em>s.c.</em> is the estimated GHG emissions of 8-week
+      s.c. infliximab treatment; <em>dose_s.c.</em> is the s.c. dose
+      per administration in mg; <em>interval_s.c.</em> is the number
+      of weeks between administrations; <em>distance</em> is the
+      one-way distance from hospital to home; <em>EFtype</em> is the
+      emission factor for the selected transport type; and
+      <em>n_dispensed</em> is the number of s.c. pens dispensed per
+      delivery or pick-up.
+    </p>
+
+    <p>
+      The three supply pathways represent efficient pick-up (collection
+      alongside a planned hospital or pharmacy visit), home delivery,
+      and inefficient pick-up (a separate trip made specifically to
+      collect the pens).
+    </p>
+
+    <h3>Intravenous GHG emissions</h3>
+
+    <code>
+      i.v. = (0.56 × dose_i.v. × weight
+      + 16 × EFtype × distance + 11.25) / interval_i.v.
+    </code>
+
+    <p>
+      Here, <em>i.v.</em> is the estimated GHG emissions of 8-week
+      i.v. infliximab treatment; <em>dose_i.v.</em> is the i.v. dose
+      in mg/kg; <em>weight</em> is patient weight in kg;
+      <em>interval_i.v.</em> is the number of weeks between
+      administrations; <em>distance</em> is the one-way distance
+      from hospital to home; and <em>EFtype</em> is the emission
+      factor for the selected patient transport type.
+    </p>
+
+    <p class="small-note">
+      The equations are implemented as supplied. Distance is not
+      automatically doubled in the i.v. equation; the factor of 2
+      appears explicitly only in the inefficient s.c. pick-up equation.
+    </p>
   </section>
+
+  <section class="sources-section">
+    <h2>Sources and references</h2>
+    <p>
+      Add the publications, life-cycle assessment details,
+      emission-factor sources, and supporting documentation used
+      for the model here.
+    </p>
+
+    <div class="sources-placeholder">
+      <ol>
+        <li>{Publication of this study will go here}]</li>
+        <li>CO2 emissiefactoren Personenvervoer. 2024  [cited 2026 18-06]; Available from: https://co2emissiefactoren.nl/factoren/2024/13/personenvervoer/.</li>
+      </ol>
+    </div>
+  </section>
+
 </main>
 
 <script>
   const byId = id => document.getElementById(id);
+
   const readNumber = id => {
     const raw = byId(id).value.trim();
     return raw === "" ? NaN : Number(raw);
   };
-  const validNonNegative = value => Number.isFinite(value) && value >= 0;
+
+  const validNonNegative = value =>
+    Number.isFinite(value) && value >= 0;
 
   byId("scMethod").addEventListener("change", event => {
-    byId("dispensedGroup").hidden = event.target.value !== "inefficient";
+    byId("dispensedGroup").hidden =
+      event.target.value !== "inefficient";
   });
+
   byId("calculateButton").addEventListener("click", calculateGHG);
 
   function calculateGHG() {
@@ -115,38 +431,70 @@
     const method = byId("scMethod").value;
     const nDispensed = readNumber("nDispensed");
 
-    const baseValues = [scDosage, ivDose, weight, distance, efType];
-    const invalid = baseValues.some(value => !validNonNegative(value)) ||
+    const baseValues = [
+      scDosage, ivDose, weight, distance, efType
+    ];
+
+    const invalid =
+      baseValues.some(value => !validNonNegative(value)) ||
       !Number.isFinite(scInterval) || scInterval <= 0 ||
       !Number.isFinite(ivInterval) || ivInterval <= 0 ||
-      (method === "inefficient" && !validNonNegative(nDispensed));
+      (
+        method === "inefficient" &&
+        (!Number.isFinite(nDispensed) || nDispensed <= 0)
+      );
 
     if (invalid) {
-      byId("scResult").textContent = "Complete all required fields with valid non-negative numbers; intervals must be greater than 0.";
-      byId("ivResult").textContent = "Complete all required fields with valid non-negative numbers; intervals must be greater than 0.";
-      byId("differenceResult").textContent = "Cannot calculate with invalid or missing values.";
+      byId("scResult").textContent =
+        "Complete all required fields with valid non-negative numbers. " +
+        "Intervals and number dispensed for inefficient pick-up must be greater than 0.";
+
+      byId("ivResult").textContent =
+        "Complete all required fields with valid non-negative numbers. " +
+        "Intervals and number dispensed for inefficient pick-up must be greater than 0.";
+
+      byId("differenceResult").textContent =
+        "Cannot calculate with invalid or missing values.";
+
       return;
     }
 
     let supplyEmissions = 0;
-    if (method === "delivery") supplyEmissions = 4.15e-6 * distance;
+
+    if (method === "delivery") {
+      supplyEmissions = 4.15e-6 * distance;
+    }
+
     if (method === "inefficient") {
       const pickupTrips = (8 / scInterval) / nDispensed;
       supplyEmissions = pickupTrips * 2 * distance * efType;
     }
 
-    const scGHG = (0.42 * scDosage + 0.96) / scInterval + supplyEmissions;
-    const ivGHG = (0.56 * ivDose * weight + 16 * efType * distance + 11.25) / ivInterval;
+    const scGHG =
+      (0.42 * scDosage + 0.96) / scInterval +
+      supplyEmissions;
+
+    const ivGHG =
+      (0.56 * ivDose * weight +
+       16 * efType * distance +
+       11.25) / ivInterval;
+
     const difference = ivGHG - scGHG;
 
-    byId("scResult").textContent = `${scGHG.toFixed(2)} kgCO2-eq`;
-    byId("ivResult").textContent = `${ivGHG.toFixed(2)} kgCO2-eq`;
-    byId("differenceResult").textContent = difference > 0
-      ? `i.v. administration is ${difference.toFixed(2)} kgCO2-eq higher than s.c. administration.`
-      : difference < 0
-        ? `s.c. administration is ${Math.abs(difference).toFixed(2)} kgCO2-eq higher than i.v. administration.`
-        : "Both administration routes have the same estimated emissions.";
+    byId("scResult").innerHTML =
+      `${scGHG.toFixed(2)} kg CO<sub>2</sub>-eq`;
+
+    byId("ivResult").innerHTML =
+      `${ivGHG.toFixed(2)} kg CO<sub>2</sub>-eq`;
+
+    byId("differenceResult").innerHTML =
+      difference > 0
+        ? `i.v. administration is ${difference.toFixed(2)} kg CO<sub>2</sub>-eq higher than s.c. administration.`
+        : difference < 0
+          ? `s.c. administration is ${Math.abs(difference).toFixed(2)} kg CO<sub>2</sub>-eq higher than i.v. administration.`
+          : "Both administration routes have the same estimated emissions.";
   }
 </script>
+
 </body>
 </html>
